@@ -1,1 +1,29 @@
-# TODO: add workflow
+name: Schedule Action
+
+on:
+  schedule:
+    - cron: '42 1 * * *'
+
+jobs:
+  update-image:
+    name: Update image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Install Pillow
+        run: python3 -m pip install --upgrade Pillow
+      - name: Grab latest image
+        run: wget https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_HMII.jpg -O spots.jpg
+      - name: Process image
+        run: python3 process_hmi.py
+      - name: Commit image
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.email "noreply@gh_actions"
+          git config --global user.name "Github Actions"
+          git add out.bmp
+          git commit -m "Add image"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git push
