@@ -2,7 +2,7 @@ name: Schedule Action
 
 on:
   schedule:
-    - cron: '42 1 * * *'
+    - cron: '42 8 * * *'  # 12:42 AM PST
 
 jobs:
   update-image:
@@ -18,12 +18,10 @@ jobs:
       - name: Process image
         run: python3 process_hmi.py
       - name: Commit image
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.email "noreply@gh_actions"
           git config --global user.name "Github Actions"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
           git add out.bmp
           git commit -m "Add image"
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
           git push
